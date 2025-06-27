@@ -34,7 +34,7 @@ export const useImageUpload = (): UseImageUploadReturn => {
       // Если URL не содержит домен, добавляем базовый URL сервера
       const fullUrl = result.url.startsWith('http') 
         ? result.url 
-        : `http://localhost:5000${result.url}`;
+        : `https://infocryptox.com${result.url}`;
       
       return fullUrl;
     } catch (err: any) {
