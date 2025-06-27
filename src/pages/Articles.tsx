@@ -291,7 +291,7 @@ export const Articles: React.FC = () => {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => navigate('/articles/new')}
+                      onClick={() => navigate('/admin/articles/new')}
           sx={{
             background: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)',
             borderRadius: 3,

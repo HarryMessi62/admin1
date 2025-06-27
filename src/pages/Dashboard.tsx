@@ -314,7 +314,7 @@ export const Dashboard: React.FC = () => {
       }}>
         <Box>
           <Paper 
-            onClick={() => navigate('/articles/new')}
+            onClick={() => navigate('/admin/articles/new')}
             sx={{ 
               p: 3, 
               backgroundColor: '#1e293b',
@@ -352,7 +352,7 @@ export const Dashboard: React.FC = () => {
         
         <Box>
           <Paper 
-            onClick={() => navigate('/articles')}
+            onClick={() => navigate('/admin/articles')}
             sx={{ 
               p: 3, 
               backgroundColor: '#1e293b',
@@ -390,7 +390,7 @@ export const Dashboard: React.FC = () => {
         
         <Box>
           <Paper 
-            onClick={() => navigate('/settings')}
+            onClick={() => navigate('/admin/settings')}
             sx={{ 
               p: 3, 
               backgroundColor: '#1e293b',
@@ -461,7 +461,7 @@ export const Dashboard: React.FC = () => {
                   cursor: 'pointer',
                   '&:hover': { textDecoration: 'underline' }
                 }}
-                onClick={() => navigate('/articles')}
+                onClick={() => navigate('/admin/articles')}
               >
                 Посмотреть все
               </Typography>
@@ -574,7 +574,7 @@ export const Dashboard: React.FC = () => {
                       borderBottom: 'none',
                     }
                   }}
-                  onClick={() => navigate('/articles')}
+                  onClick={() => navigate('/admin/articles')}
                 >
                   <ListItemText
                     primary={

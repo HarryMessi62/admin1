@@ -48,7 +48,7 @@ export const Login: React.FC = () => {
       return authResponse;
     },
     onSuccess: () => {
-      navigate('/dashboard');
+      navigate('/admin/dashboard');
     },
   });
 

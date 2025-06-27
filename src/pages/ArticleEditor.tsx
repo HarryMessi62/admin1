@@ -191,7 +191,7 @@ export const ArticleEditor: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['articles'] });
       setShowSuccessMessage(true);
-      setTimeout(() => navigate('/articles'), 2000);
+      setTimeout(() => navigate('/admin/articles'), 2000);
     },
   });
 
@@ -220,7 +220,7 @@ export const ArticleEditor: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['articles'] });
       queryClient.invalidateQueries({ queryKey: ['article', id] });
       setShowSuccessMessage(true);
-      setTimeout(() => navigate('/articles'), 2000);
+      setTimeout(() => navigate('/admin/articles'), 2000);
     },
     onError: (error) => {
       console.error('❌ Ошибка при обновлении статьи:', error);
@@ -298,7 +298,7 @@ export const ArticleEditor: React.FC = () => {
         <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
           <Button 
             variant="contained" 
-            onClick={() => navigate('/articles')}
+            onClick={() => navigate('/admin/articles')}
           >
             Вернуться к списку статей
           </Button>
@@ -320,7 +320,7 @@ export const ArticleEditor: React.FC = () => {
       <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
         {/* Header */}
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <IconButton onClick={() => navigate('/articles')} sx={{ mr: 2 }}>
+          <IconButton onClick={() => navigate('/admin/articles')} sx={{ mr: 2 }}>
             <ArrowBackIcon />
           </IconButton>
           <Typography variant="h4" component="h1" sx={{ flexGrow: 1 }}>

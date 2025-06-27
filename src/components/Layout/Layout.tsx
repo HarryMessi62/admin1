@@ -66,34 +66,34 @@ const navigationItems: NavigationItem[] = [
   {
     text: 'Дашборд',
     icon: <DashboardIcon />,
-    path: '/dashboard',
+    path: '/admin/dashboard',
   },
   {
     text: 'Пользователи',
     icon: <PeopleIcon />,
-    path: '/users',
+    path: '/admin/users',
     roles: ['super_admin'],
   },
   {
     text: 'Статьи',
     icon: <ArticleIcon />,
-    path: '/articles',
+    path: '/admin/articles',
   },
   {
     text: 'Домены',
     icon: <DomainIcon />,
-    path: '/domains',
+    path: '/admin/domains',
   },
   {
     text: 'Парсер новостей',
     icon: <ParserIcon />,
-    path: '/parser',
+    path: '/admin/parser',
     roles: ['super_admin'],
   },
   {
     text: 'Настройки',
     icon: <SettingsIcon />,
-    path: '/settings',
+    path: '/admin/settings',
     roles: ['super_admin'],
   },
 ];
@@ -127,7 +127,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/admin/login');
     handleMenuClose();
   };
 
@@ -149,7 +149,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   const handleArticleClick = (articleId: string) => {
-    navigate(`/articles/edit/${articleId}`);
+    navigate(`/admin/articles/edit/${articleId}`);
     handleSearchClose();
   };
 
@@ -429,7 +429,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             }}
           >
             <MenuItem 
-              onClick={() => { navigate('/profile'); handleMenuClose(); }}
+              onClick={() => { navigate('/admin/profile'); handleMenuClose(); }}
               sx={{
                 py: 1.5,
                 '&:hover': {

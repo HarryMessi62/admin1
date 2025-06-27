@@ -108,7 +108,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   return <>{children}</>;
@@ -123,7 +123,7 @@ const AuthRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
   return <>{children}</>;
@@ -134,7 +134,7 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route
-        path="/login"
+        path="/admin/login"
         element={
           <AuthRoute>
             <Login />
@@ -142,7 +142,7 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/dashboard"
+        path="/admin/dashboard"
         element={
           <ProtectedRoute>
             <Layout>
@@ -152,7 +152,7 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/users"
+        path="/admin/users"
         element={
           <ProtectedRoute>
             <Layout>
@@ -162,7 +162,7 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/articles"
+        path="/admin/articles"
         element={
           <ProtectedRoute>
             <Layout>
@@ -172,7 +172,7 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/articles/new"
+        path="/admin/articles/new"
         element={
           <ProtectedRoute>
             <Layout>
@@ -182,7 +182,7 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/articles/edit/:id"
+        path="/admin/articles/edit/:id"
         element={
           <ProtectedRoute>
             <Layout>
@@ -192,7 +192,7 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/domains"
+        path="/admin/domains"
         element={
           <ProtectedRoute>
             <Layout>
@@ -202,7 +202,7 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/domain-settings"
+        path="/admin/domain-settings"
         element={
           <ProtectedRoute>
             <Layout>
@@ -212,7 +212,7 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/parser"
+        path="/admin/parser"
         element={
           <ProtectedRoute>
             <Layout>
@@ -222,7 +222,7 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/parser-settings"
+        path="/admin/parser-settings"
         element={
           <ProtectedRoute>
             <Layout>
@@ -232,7 +232,7 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/settings"
+        path="/admin/settings"
         element={
           <ProtectedRoute>
             <Layout>
@@ -242,7 +242,7 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route
-        path="/profile"
+        path="/admin/profile"
         element={
           <ProtectedRoute>
             <Layout>
@@ -252,8 +252,8 @@ const AppRoutes: React.FC = () => {
         }
       />
 
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
     </Routes>
   );
 };
