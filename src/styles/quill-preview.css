@@ -1,0 +1,163 @@
+/* Стили для кодовых блоков в предварительном просмотре */
+.preview-content pre {
+  background-color: #0f172a !important;
+  color: #e2e8f0 !important;
+  padding: 20px !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  overflow-x: auto !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  margin: 20px 0 !important;
+  font-family: Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+}
+
+.preview-content code {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  color: #3b82f6 !important;
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+  font-family: Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  word-break: break-all !important;
+}
+
+.preview-content pre code {
+  background-color: transparent !important;
+  color: inherit !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+/* Стили для списков */
+.preview-content ul,
+.preview-content ol {
+  padding-left: 24px !important;
+  color: #f8fafc !important;
+  margin: 16px 0 !important;
+}
+
+.preview-content li {
+  margin-bottom: 8px !important;
+  line-height: 1.7 !important;
+}
+
+.preview-content ul li::marker {
+  color: #3b82f6 !important;
+}
+
+.preview-content ol li::marker {
+  color: #3b82f6 !important;
+  font-weight: 600 !important;
+}
+
+/* Стили для цитат */
+.preview-content blockquote {
+  border-left: 4px solid #3b82f6 !important;
+  padding-left: 20px !important;
+  margin: 24px 0 !important;
+  font-style: italic !important;
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  padding: 16px 20px !important;
+  border-radius: 0 12px 12px 0 !important;
+  color: #cbd5e1 !important;
+  font-size: 18px !important;
+}
+
+/* Стили для заголовков */
+.preview-content h1,
+.preview-content h2,
+.preview-content h3,
+.preview-content h4,
+.preview-content h5,
+.preview-content h6 {
+  color: #f8fafc !important;
+  font-weight: 600 !important;
+  margin-top: 28px !important;
+  margin-bottom: 16px !important;
+  line-height: 1.3 !important;
+}
+
+.preview-content h1 {
+  font-size: 2.5rem !important;
+  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  margin-top: 16px !important;
+}
+
+.preview-content h2 {
+  font-size: 2rem !important;
+}
+
+.preview-content h3 {
+  font-size: 1.5rem !important;
+}
+
+.preview-content h4 {
+  font-size: 1.25rem !important;
+}
+
+.preview-content h5 {
+  font-size: 1.125rem !important;
+}
+
+.preview-content h6 {
+  font-size: 1rem !important;
+}
+
+/* Стили для параграфов */
+.preview-content p {
+  color: #f8fafc !important;
+  line-height: 1.8 !important;
+  margin-bottom: 16px !important;
+  font-size: 16px !important;
+  word-break: break-word !important;
+}
+
+/* Стили для изображений */
+.preview-content img {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 12px !important;
+  margin: 24px 0 !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Стили для ссылок */
+.preview-content a {
+  color: #3b82f6 !important;
+  text-decoration: underline !important;
+  text-decoration-color: rgba(59, 130, 246, 0.5) !important;
+  text-underline-offset: 3px !important;
+  transition: all 0.2s ease !important;
+}
+
+.preview-content a:hover {
+  color: #2563eb !important;
+  text-decoration-color: #2563eb !important;
+}
+
+/* Стили для выделения текста */
+.preview-content strong {
+  color: #f8fafc !important;
+  font-weight: 700 !important;
+}
+
+.preview-content em {
+  color: #cbd5e1 !important;
+  font-style: italic !important;
+}
+
+/* Стили для горизонтальных линий */
+.preview-content hr {
+  border: none !important;
+  height: 2px !important;
+  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%) !important;
+  margin: 32px 0 !important;
+  border-radius: 1px !important;
+} 
