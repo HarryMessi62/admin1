@@ -95,7 +95,7 @@ export const Articles: React.FC = () => {
   };
 
   const handleEdit = (id: string) => {
-    navigate(`/articles/edit/${id}`);
+    navigate(`/admin/articles/edit/${id}`);
   };
 
   const getStatusColor = (status: string): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {

@@ -17,6 +17,7 @@ export interface User {
     lastLogin: string | null;
     loginCount: number;
   };
+  accessExpiresAt?: string | null;
   profile: {
     firstName?: string;
     lastName?: string;
@@ -193,6 +194,7 @@ export interface RegisterRequest {
   profile?: {
     description?: string;
   };
+  accessExpiresAt?: string | null;
 }
 
 export interface ApiResponse<T> {
@@ -256,4 +258,14 @@ export interface FileUpload {
 export interface ArticleLike {
   liked: boolean;
   totalLikes: number;
+}
+
+// === Crypto ===
+export interface CryptoPrice {
+  symbol: string;
+  name: string;
+  price: number;
+  change24h: number;
+  changePercent24h: number;
+  marketCap?: number;
 } 

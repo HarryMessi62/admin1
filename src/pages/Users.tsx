@@ -36,6 +36,10 @@ import * as yup from 'yup';
 import apiService from '../services/api';
 import { type User, type RegisterRequest, type Domain } from '../types/api';
 import { useAuth } from '../hooks/useAuth';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import ruLocale from 'date-fns/locale/ru';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 
 const userSchema = yup.object().shape({
   username: yup.string().required('Имя пользователя обязательно').min(3, 'Минимум 3 символа'),
@@ -50,10 +54,12 @@ const userSchema = yup.object().shape({
   profile: yup.object().shape({
     description: yup.string(),
   }),
+  accessExpiresAt: yup.date().nullable().optional(),
 });
 
 interface UserFormData extends Omit<RegisterRequest, 'password'> {
   password?: string;
+  accessExpiresAt?: Date | null;
 }
 
 export const Users: React.FC = () => {
@@ -97,6 +103,7 @@ export const Users: React.FC = () => {
       username: '',
       email: '',
       password: '',
+      accessExpiresAt: null,
       restrictions: {
         maxArticles: 100,
         canDelete: true,
@@ -171,6 +178,7 @@ export const Users: React.FC = () => {
         ) || []
       },
       profile: user.profile,
+      accessExpiresAt: user.accessExpiresAt ? new Date(user.accessExpiresAt) : null,
     });
     setOpenDialog(true);
   };
@@ -191,15 +199,24 @@ export const Users: React.FC = () => {
       if (!updateData.password) {
         delete updateData.password;
       }
-      updateUserMutation.mutate({ id: editingUser._id, data: updateData });
+      const submitData:any = { ...updateData };
+      if (!submitData.accessExpiresAt) delete submitData.accessExpiresAt;
+      updateUserMutation.mutate({ id: editingUser._id, data: submitData });
     } else {
       if (!data.password) {
         setSnackbar({ open: true, message: 'Пароль обязателен для нового пользователя', severity: 'error' });
         return;
       }
-      createUserMutation.mutate(data as RegisterRequest);
+      const submitData:any = { ...data };
+      if (!submitData.accessExpiresAt) delete submitData.accessExpiresAt;
+      createUserMutation.mutate(submitData as RegisterRequest);
     }
   };
+
+  const rows = usersData?.data?.users?.map((u: any) => ({
+    ...u,
+    daysRemaining: u.accessExpiresAt ? Math.max(0, Math.ceil((new Date(u.accessExpiresAt).getTime() - Date.now()) / (24 * 60 * 60 * 1000))) : null,
+  }));
 
   const columns: GridColDef[] = [
     {
@@ -311,6 +328,12 @@ export const Users: React.FC = () => {
       },
     },
     {
+      field: 'daysRemaining',
+      headerName: 'Осталось дней',
+      width: 120,
+      renderCell: (params) => params.value !== null ? params.value : '∞',
+    },
+    {
       field: 'actions',
       type: 'actions',
       headerName: 'Действия',
@@ -368,6 +391,7 @@ export const Users: React.FC = () => {
               username: '',
               email: '',
               password: '',
+              accessExpiresAt: null,
               restrictions: {
                 maxArticles: 100,
                 canDelete: true,
@@ -428,7 +452,7 @@ export const Users: React.FC = () => {
         overflow: 'hidden'
       }}>
         <DataGrid
-          rows={usersData?.data.users || []}
+          rows={rows || []}
           columns={columns}
           loading={isLoading}
           paginationMode="server"
@@ -617,6 +641,21 @@ export const Users: React.FC = () => {
                     rows={3}
                     fullWidth
                   />
+                )}
+              />
+
+              <Controller
+                name="accessExpiresAt"
+                control={control}
+                render={({ field }) => (
+                  <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale}>
+                    <DateTimePicker
+                      label="Дата окончания доступа"
+                      value={field.value}
+                      onChange={field.onChange}
+                      slotProps={{ textField: { fullWidth: true } }}
+                    />
+                  </LocalizationProvider>
                 )}
               />
             </Box>

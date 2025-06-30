@@ -38,6 +38,15 @@ class ApiService {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+      
+      // Логируем запросы создания статей
+      if (config.method === 'post' && config.url === '/articles') {
+        console.log('🌐 INTERCEPTOR - Создание статьи, данные запроса:', config.data);
+        if (config.data && typeof config.data === 'object') {
+          console.log('🌐 INTERCEPTOR - Данные планирования:', config.data.scheduling);
+        }
+      }
+      
       return config;
     });
 
@@ -48,7 +57,7 @@ class ApiService {
         if (error.response?.status === 401) {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          window.location.href = '/login';
+          // window.location.href = '/login';
         } else if (error.response?.status === 429) {
           console.warn('⚠️ Rate limit exceeded. Retrying after delay...');
           // Можно добавить логику повторного запроса с задержкой
@@ -207,7 +216,14 @@ class ApiService {
   }
 
   async createArticle(data: Partial<Article>): Promise<Article> {
+    console.log('🌐 API Service - Отправляем данные статьи на сервер:', data);
+    console.log('🌐 API Service - Данные планирования:', (data as any).scheduling);
+    
     const response: AxiosResponse<ApiResponse<Article>> = await this.api.post('/articles', data);
+    
+    console.log('🌐 API Service - Ответ сервера:', response.data);
+    console.log('🌐 API Service - Статус созданной статьи:', response.data.data!.status);
+    
     return response.data.data!;
   }
 
@@ -557,8 +573,53 @@ class ApiService {
 
   // SEO и Sitemap
   async refreshSitemap(): Promise<{ success: boolean; message: string; timestamp: string }> {
-    const response: AxiosResponse<ApiResponse<{ success: boolean; message: string; timestamp: string }>> = await this.api.post('/refresh-sitemap');
+    const response: AxiosResponse<ApiResponse<{ success: boolean; message: string; timestamp: string }>> = await this.api.post('/sitemap/refresh');
     return response.data.data!;
+  }
+
+  // Админские методы для управления лайками и комментариями
+  async getArticleLikes(articleId: string): Promise<{ totalLikes: number; stats: any }> {
+    const response: AxiosResponse<{ articleId: string; totalLikes: number; userLiked: boolean; stats: any }> = await this.api.get(`/likes/article/${articleId}`);
+    return { totalLikes: response.data.totalLikes, stats: response.data.stats };
+  }
+
+  async getArticleComments(articleId: string, params?: { page?: number; limit?: number }): Promise<{
+    comments: any[];
+    total: number;
+    page: number;
+    totalPages: number;
+  }> {
+    const response: AxiosResponse<{
+      comments: any[];
+      total: number;
+      page: number;
+      totalPages: number;
+    }> = await this.api.get(`/comments/article/${articleId}`, { params });
+    return response.data;
+  }
+
+  async updateArticleLikes(articleId: string, likes: { real?: number; fake?: number }): Promise<void> {
+    await this.api.put(`/admin/articles/${articleId}/likes`, likes);
+  }
+
+  async addAdminComment(articleId: string, data: { userEmail: string; text: string }): Promise<any> {
+    const response: AxiosResponse<ApiResponse<any>> = await this.api.post(`/admin/articles/${articleId}/comments`, {
+      userId: 'admin',
+      userEmail: data.userEmail,
+      text: data.text
+    });
+    return response.data.data!;
+  }
+
+  async deleteAdminComment(commentId: string): Promise<void> {
+    await this.api.delete(`/admin/comments/${commentId}`);
+  }
+
+  async updateArticleStats(articleId: string, stats: {
+    likes?: { total?: number; real?: number; fake?: number };
+    comments?: { total?: number; real?: number; fake?: number };
+  }): Promise<void> {
+    await this.api.put(`/admin/articles/${articleId}/stats`, stats);
   }
 
   /*

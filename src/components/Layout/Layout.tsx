@@ -113,6 +113,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [searchResults, setSearchResults] = useState<Article[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
+  const { data: accessData } = useQuery({
+    queryKey: ['access-days'],
+    queryFn: () => user?.role === 'user_admin' ? apiService.getUserDashboard() : Promise.resolve(null),
+    enabled: user?.role === 'user_admin',
+    staleTime: 60 * 60 * 1000,
+  });
+  const daysRemaining = accessData?.user?.daysRemaining ?? null;
+
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
@@ -378,6 +386,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {daysRemaining !== null && (
+              <Chip label={`🔥 ${daysRemaining} дн.`} color={daysRemaining === 0 ? 'error' : 'warning'} size="small" sx={{ mr: 2 }} />
+            )}
             <Typography variant="body2" sx={{ 
               display: { xs: 'none', sm: 'block' },
               color: '#cbd5e1',

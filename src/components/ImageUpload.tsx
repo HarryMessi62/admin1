@@ -224,7 +224,11 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
             <Button
               variant="outlined"
               startIcon={<ImageIcon />}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClick();
+              }}
+              disabled={disabled || isLoading}
               sx={{
                 borderColor: 'rgba(59, 130, 246, 0.3)',
                 color: '#3b82f6',

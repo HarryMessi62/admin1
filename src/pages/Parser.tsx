@@ -456,7 +456,7 @@ const Parser: React.FC = () => {
             <Button
               variant="outlined"
               startIcon={<Settings />}
-              onClick={() => window.location.href = '/parser-settings'}
+              onClick={() => window.location.href = '/admin/parser-settings'}
             >
               Настройки
             </Button>

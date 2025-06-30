@@ -12,6 +12,7 @@ import {
   Chip,
   Paper,
   Divider,
+  Alert,
 } from '@mui/material';
 import {
   TrendingUp,
@@ -95,6 +96,7 @@ const StatsCard: React.FC<StatsCardProps> = ({ title, value, change, icon, gradi
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isSuperAdmin = user?.role === 'super_admin';
 
   // Функция для получения русского названия статуса
   const getStatusLabel = (status: string) => {
@@ -132,7 +134,7 @@ export const Dashboard: React.FC = () => {
       'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'
     ];
   
-    if (isSuperAdmin) {
+    if (user?.role === 'super_admin') {
       // Логика для супер админа (группировка по месяцам)
       const last12Months = [];
       const currentDate = new Date();
@@ -177,12 +179,7 @@ export const Dashboard: React.FC = () => {
   const { data: dashboardData, isLoading } = useQuery({
     queryKey: ['dashboard'],
     queryFn: () => {
-      // Проверяем роль пользователя и вызываем соответствующий endpoint
-      if (user?.role === 'super_admin') {
-        return apiService.getDashboard();
-      } else {
-        return apiService.getUserDashboard();
-      }
+      return isSuperAdmin ? apiService.getDashboard() : apiService.getUserDashboard();
     },
   });
 
@@ -211,12 +208,9 @@ export const Dashboard: React.FC = () => {
   }
 
   const { overview } = dashboardData || { overview: {} as any };
-
-  // Определяем является ли пользователь супер админом
-  const isSuperAdmin = user?.role === 'super_admin';
   
   // Адаптируем данные в зависимости от роли
-  const adaptedOverview = isSuperAdmin 
+  const adaptedOverview = user?.role === 'super_admin' 
     ? overview 
     : {
         totalUsers: overview.totalArticles || 0,  // Для обычного пользователя показываем его статьи
@@ -237,11 +231,18 @@ export const Dashboard: React.FC = () => {
           WebkitTextFillColor: 'transparent',
           mb: 1
         }}>
-          {isSuperAdmin ? 'Добро пожаловать в админ панель!' : 'Добро пожаловать!'}
+          {user?.role === 'super_admin' ? 'Добро пожаловать в админ панель!' : 'Добро пожаловать!'}
         </Typography>
         <Typography variant="body1" sx={{ color: '#cbd5e1' }}>
-          {isSuperAdmin ? 'Управляйте контентом вашего новостного сайта' : 'Управляйте вашими статьями'}
+          {user?.role === 'super_admin' ? 'Управляйте контентом вашего новостного сайта' : 'Управляйте вашими статьями'}
         </Typography>
+        {user?.role !== 'super_admin' && dashboardData.user?.daysRemaining !== null && (
+          <Alert severity={dashboardData.user.daysRemaining === 0 ? 'error' : 'info'} sx={{ mb: 3 }}>
+            {dashboardData.user.daysRemaining === 0
+              ? 'Срок доступа истёк. Продлите подписку, чтобы продолжить публиковать статьи.'
+              : `Осталось дней доступа: ${dashboardData.user.daysRemaining}`}
+          </Alert>
+        )}
       </Box>
 
       {/* Статистические карточки */}
@@ -388,6 +389,7 @@ export const Dashboard: React.FC = () => {
           </Paper>
         </Box>
         
+        {isSuperAdmin && (
         <Box>
           <Paper 
             onClick={() => navigate('/admin/settings')}
@@ -425,6 +427,7 @@ export const Dashboard: React.FC = () => {
             </Box>
           </Paper>
         </Box>
+        )}
       </Box>
 
       {/* Последние статьи и Статистика */}

@@ -29,7 +29,12 @@ import { type Article, type Domain } from '../types/api';
 import { useAuth } from '../hooks/useAuth';
 import { RichTextEditor } from '../components/RichTextEditor';
 import { ImageUpload } from '../components/ImageUpload';
+import { ArticleStatsManager } from '../components/ArticleStatsManager';
 import { useImageUpload } from '../hooks/useImageUpload';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import ruLocale from 'date-fns/locale/ru';
 
 const articleSchema = yup.object().shape({
   title: yup.string().required('Заголовок обязателен').max(200, 'Максимум 200 символов'),
@@ -40,6 +45,7 @@ const articleSchema = yup.object().shape({
   status: yup.string().oneOf(['draft', 'published', 'scheduled', 'archived']).required(),
   featuredImage: yup.string().default(''),
   tags: yup.array().of(yup.string().required()).default([]),
+  scheduledAt: yup.date().nullable().optional(),
 });
 
 const categories = [
@@ -59,6 +65,7 @@ interface ArticleFormData {
   tags: string[];
   status: 'draft' | 'published' | 'scheduled' | 'archived';
   featuredImage: string;
+  scheduledAt: Date | null;
 }
 
 export const ArticleEditor: React.FC = () => {
@@ -122,8 +129,9 @@ export const ArticleEditor: React.FC = () => {
       category: 'Other',
       domain: '',
       tags: [],
-      status: 'draft',
+      status: 'published',
       featuredImage: '',
+      scheduledAt: null,
     },
   });
 
@@ -153,6 +161,7 @@ export const ArticleEditor: React.FC = () => {
         tags: articleData.tags || [],
         status: articleData.status || 'draft',
         featuredImage: articleData.media?.featuredImage?.url || '',
+        scheduledAt: articleData.scheduledAt ? new Date(articleData.scheduledAt) : null,
       };
       
       console.log('🔍 Form data to reset:', formData);
@@ -171,6 +180,15 @@ export const ArticleEditor: React.FC = () => {
   // Мутации
   const createArticleMutation = useMutation({
     mutationFn: (data: ArticleFormData) => {
+      console.log('🔍 Данные формы перед отправкой:', data);
+      console.log('🔍 Статус в данных формы:', data.status);
+      
+      // Подготавливаем данные планирования на основе статуса
+      const scheduling = {
+        publishNow: data.status === 'published',
+        scheduleDate: data.status === 'scheduled' ? data.scheduledAt : null
+      };
+      
       const articleData = {
         title: data.title,
         excerpt: data.excerpt,
@@ -178,14 +196,19 @@ export const ArticleEditor: React.FC = () => {
         category: data.category as Article['category'],
         domain: data.domain,
         tags: data.tags,
-        status: data.status,
+        scheduling: scheduling,
         media: {
           featuredImage: data.featuredImage ? {
             url: data.featuredImage,
             alt: data.title,
           } : undefined
-        }
+        },
+        scheduledAt: data.status === 'scheduled' ? data.scheduledAt : null
       };
+      
+      console.log('🔍 Итоговые данные для API:', articleData);
+      console.log('🔍 Данные планирования:', scheduling);
+      
       return apiService.createArticle(articleData);
     },
     onSuccess: () => {
@@ -205,12 +228,17 @@ export const ArticleEditor: React.FC = () => {
         domain: data.domain,
         tags: data.tags,
         status: data.status,
+        scheduling: {
+          publishNow: data.status === 'published',
+          scheduleDate: data.status === 'scheduled' ? data.scheduledAt : null,
+        },
         media: {
           featuredImage: data.featuredImage ? {
             url: data.featuredImage,
             alt: data.title,
           } : undefined
-        }
+        },
+        scheduledAt: data.status === 'scheduled' ? data.scheduledAt : null
       };
       console.log('🔄 Отправляем запрос на обновление статьи:', { id, articleData });
       return apiService.updateArticle(id, articleData);
@@ -230,6 +258,9 @@ export const ArticleEditor: React.FC = () => {
   const onSubmit = async (data: ArticleFormData) => {
     try {
       console.log('🚀 Отправка формы:', { isEditing, id, data });
+      console.log('🚀 Статус из формы:', data.status);
+      console.log('🚀 Все значения формы:', watch());
+      
       let finalData = { ...data };
 
       // Если есть выбранный файл изображения, загружаем его на сервер
@@ -246,12 +277,14 @@ export const ArticleEditor: React.FC = () => {
       }
 
       console.log('📝 Итоговые данные для отправки:', finalData);
+      console.log('📝 Статус в итоговых данных:', finalData.status);
 
     if (isEditing && id) {
         console.log('✏️ Обновляем статью с ID:', id);
         updateArticleMutation.mutate({ id, data: finalData });
     } else {
         console.log('🆕 Создаем новую статью');
+        console.log('🆕 Статус при создании:', finalData.status);
         createArticleMutation.mutate(finalData);
       }
     } catch (error) {
@@ -599,6 +632,19 @@ export const ArticleEditor: React.FC = () => {
                   />
               </Paper>
 
+        {/* Управление лайками и комментариями (только при редактировании) */}
+        {isEditing && article && (
+          <Paper sx={{ p: 3, mb: 3, backgroundColor: '#1e293b', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
+            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#f8fafc' }}>
+              📊 Управление лайками и комментариями
+            </Typography>
+            <ArticleStatsManager 
+              articleId={article._id}
+              initialStats={article}
+            />
+          </Paper>
+        )}
+
         {/* Настройки публикации */}
         <Paper sx={{ p: 3, mb: 3, backgroundColor: '#1e293b', border: '1px solid rgba(59, 130, 246, 0.1)' }}>
           <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, color: '#f8fafc' }}>
@@ -608,28 +654,54 @@ export const ArticleEditor: React.FC = () => {
                 <Controller
                   name="status"
                   control={control}
-                  render={({ field }) => (
-              <FormControl fullWidth sx={{ mb: 2 }}>
-                <InputLabel sx={{ color: '#cbd5e1' }}>Статус *</InputLabel>
-                <Select 
-                  {...field} 
-                  label="Статус *"
-                  sx={{
-                    backgroundColor: 'rgba(59, 130, 246, 0.05)',
-                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(59, 130, 246, 0.2)' },
-                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(59, 130, 246, 0.4)' },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3b82f6' },
-                    '& .MuiSelect-select': { color: '#f8fafc' }
+                  render={({ field }) => {
+                    console.log('🎛️ STATUS FIELD - Текущее значение:', field.value);
+                    console.log('🎛️ STATUS FIELD - Все значения формы:', watch());
+                    
+                    return (
+                      <FormControl fullWidth sx={{ mb: 2 }}>
+                        <InputLabel sx={{ color: '#cbd5e1' }}>Статус *</InputLabel>
+                        <Select 
+                          {...field} 
+                          label="Статус *"
+                          onChange={(e) => {
+                            console.log('🎛️ STATUS CHANGE - Новое значение:', e.target.value);
+                            field.onChange(e);
+                          }}
+                          sx={{
+                            backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                            '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(59, 130, 246, 0.2)' },
+                            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(59, 130, 246, 0.4)' },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3b82f6' },
+                            '& .MuiSelect-select': { color: '#f8fafc' }
+                          }}
+                        >
+                          <MenuItem value="draft">📝 Черновик</MenuItem>
+                          <MenuItem value="published">✅ Опубликовано</MenuItem>
+                          <MenuItem value="scheduled">⏰ Запланировано</MenuItem>
+                          <MenuItem value="archived">📦 Архив</MenuItem>
+                        </Select>
+                      </FormControl>
+                    );
                   }}
-                >
-                        <MenuItem value="draft">📝 Черновик</MenuItem>
-                        <MenuItem value="published">✅ Опубликовано</MenuItem>
-                        <MenuItem value="scheduled">⏰ Запланировано</MenuItem>
-                        <MenuItem value="archived">📦 Архив</MenuItem>
-                      </Select>
-                    </FormControl>
-                  )}
                 />
+
+                {watch('status') === 'scheduled' && (
+                  <Controller
+                    name="scheduledAt"
+                    control={control}
+                    render={({ field }) => (
+                      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale}>
+                        <DateTimePicker
+                          label="Дата публикации"
+                          value={field.value}
+                          onChange={field.onChange}
+                          slotProps={{ textField: { fullWidth: true, sx:{ mb:2 } } }}
+                        />
+                      </LocalizationProvider>
+                    )}
+                  />
+                )}
 
                 <Controller
                   name="category"

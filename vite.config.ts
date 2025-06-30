@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://infocryptox.com',
+        target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
       }
