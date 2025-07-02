@@ -245,10 +245,12 @@ class ApiService {
     try {
       console.log('🔍 Попытка загрузить статью для редактирования, ID:', id);
       
-      // Пробуем получить статью через стандартный endpoint
-      const response: AxiosResponse<ApiResponse<Article>> = await this.api.get(`/articles/edit/${id}`);
+      // Первый и основной вариант – корректный endpoint "/articles/:id/edit"
+      const response: AxiosResponse<ApiResponse<Article>> = await this.api.get(`/articles/${id}/edit`);
       console.log('✅ Статья успешно загружена:', response.data);
-      return response.data.data!;
+      // Если сервер оборачивает статью в { article: {...} }, разворачиваем её
+      const payload = response.data.data!;
+      return (payload as any).article ?? (payload as any);
     } catch (error: any) {
       console.log('❌ Ошибка при загрузке через /articles/edit/, пробуем альтернативы...', error.response?.status);
       
@@ -618,6 +620,7 @@ class ApiService {
   async updateArticleStats(articleId: string, stats: {
     likes?: { total?: number; real?: number; fake?: number };
     comments?: { total?: number; real?: number; fake?: number };
+    views?: { total?: number; real?: number; fake?: number };
   }): Promise<void> {
     await this.api.put(`/admin/articles/${articleId}/stats`, stats);
   }

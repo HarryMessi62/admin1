@@ -90,6 +90,23 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     quill.on('text-change', handleTextChange);
 
+    // Патчим формат ссылки, чтобы автоматически добавлять https://
+    const Link = Quill.import('formats/link');
+    if (Link && typeof Link.sanitize === 'function') {
+      const builtInSanitize = Link.sanitize;
+      Link.sanitize = (url: string) => {
+        // Вызываем оригинальную sanitize, чтобы сохранить базовую проверку
+        let sanitized = builtInSanitize.call(Link, url);
+        // Если протокол отсутствует (не http/https/mailto/tel/ftp/#), добавляем https://
+        if (sanitized && !/^(https?:|mailto:|tel:|ftp:|#)/i.test(sanitized)) {
+          sanitized = `https://${sanitized}`;
+        }
+        return sanitized;
+      };
+      // Регистрируем обратно, чтобы Quill использовал обновлённый формат
+      Quill.register(Link, true);
+    }
+
     return () => {
       if (quillRef.current) {
         quillRef.current.off('text-change', handleTextChange);

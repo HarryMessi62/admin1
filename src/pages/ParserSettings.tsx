@@ -144,6 +144,21 @@ const ParserSettingsPage: React.FC = () => {
     }));
   };
 
+  // Обработчик изменений диапазонов начальной статистики
+  const handleInitialStatsChange = (stat: 'views' | 'likes', bound: 'min' | 'max', value: number) => {
+    if (!formData) return;
+    setFormData((prev: any) => ({
+      ...prev,
+      initialStats: {
+        ...prev.initialStats,
+        [stat]: {
+          ...prev.initialStats?.[stat],
+          [bound]: value
+        }
+      }
+    }));
+  };
+
   const handleSave = () => {
     if (formData) {
       console.log('Сохраняем настройки:', formData);
@@ -332,6 +347,67 @@ const ParserSettingsPage: React.FC = () => {
                   ]}
                 />
               </Box>
+            </Grid>
+
+            {/* Диапазоны начальной статистики */}
+            <Grid item xs={12}>
+              <Typography variant="h6" sx={{ mt: 2 }}>
+                Начальная статистика статей
+              </Typography>
+            </Grid>
+
+            {/* Группа просмотров */}
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle1" gutterBottom>Просмотры</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="Мин."
+                    value={formData.initialStats?.views?.min ?? 0}
+                    onChange={(e) => handleInitialStatsChange('views', 'min', parseInt(e.target.value))}
+                    inputProps={{ min: 0 }}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="Макс."
+                    value={formData.initialStats?.views?.max ?? 0}
+                    onChange={(e) => handleInitialStatsChange('views', 'max', parseInt(e.target.value))}
+                    inputProps={{ min: 0 }}
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+
+            {/* Группа лайков */}
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle1" gutterBottom>Лайки</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="Мин."
+                    value={formData.initialStats?.likes?.min ?? 0}
+                    onChange={(e) => handleInitialStatsChange('likes', 'min', parseInt(e.target.value))}
+                    inputProps={{ min: 0 }}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="Макс."
+                    value={formData.initialStats?.likes?.max ?? 0}
+                    onChange={(e) => handleInitialStatsChange('likes', 'max', parseInt(e.target.value))}
+                    inputProps={{ min: 0 }}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </TabPanel>

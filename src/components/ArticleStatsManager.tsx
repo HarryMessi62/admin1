@@ -26,6 +26,7 @@ import {
 import {
   ThumbUp as ThumbUpIcon,
   Comment as CommentIcon,
+  Visibility as VisibilityIcon,
   Delete as DeleteIcon,
   Add as AddIcon,
   Save as SaveIcon,
@@ -43,6 +44,11 @@ interface ArticleStatsManagerProps {
       total?: number;
     } | number;
     comments?: {
+      real?: number;
+      fake?: number;
+      total?: number;
+    } | number;
+    views?: {
       real?: number;
       fake?: number;
       total?: number;
@@ -74,7 +80,16 @@ export const ArticleStatsManager: React.FC<ArticleStatsManagerProps> = ({
     return 0;
   };
   
+  // Функция для получения количества просмотров
+  const getInitialViews = () => {
+    if (initialStats?.stats?.views?.total) return initialStats.stats.views.total;
+    if (initialStats?.views?.total) return initialStats.views.total;
+    if (typeof initialStats?.views === 'number') return initialStats.views;
+    return 0;
+  };
+
   const [likesCount, setLikesCount] = useState(getInitialLikes());
+  const [viewsCount, setViewsCount] = useState(getInitialViews());
 
   // Функция для получения количества комментариев
   const getInitialComments = () => {
@@ -91,7 +106,9 @@ export const ArticleStatsManager: React.FC<ArticleStatsManagerProps> = ({
     console.log('📊 ArticleStatsManager - initialStats:', initialStats);
     console.log('📊 ArticleStatsManager - likesCount:', getInitialLikes());
     console.log('📊 ArticleStatsManager - commentsCount:', getInitialComments());
+    console.log('📊 ArticleStatsManager - viewsCount:', getInitialViews());
     setLikesCount(getInitialLikes());
+    setViewsCount(getInitialViews());
   }, [initialStats]);
   const [addCommentDialogOpen, setAddCommentDialogOpen] = useState(false);
   const [newComment, setNewComment] = useState({
@@ -120,6 +137,21 @@ export const ArticleStatsManager: React.FC<ArticleStatsManagerProps> = ({
     },
     onError: (error: any) => {
       setErrorMessage(error.response?.data?.message || 'Ошибка обновления лайков');
+      setTimeout(() => setErrorMessage(''), 5000);
+    },
+  });
+
+  // Мутации для обновления просмотров
+  const updateViewsMutation = useMutation({
+    mutationFn: (totalViews: number) =>
+      apiService.updateArticleStats(articleId, { views: { total: totalViews } }),
+    onSuccess: () => {
+      setSuccessMessage('Просмотры успешно обновлены');
+      queryClient.invalidateQueries({ queryKey: ['article', articleId] });
+      setTimeout(() => setSuccessMessage(''), 3000);
+    },
+    onError: (error: any) => {
+      setErrorMessage(error.response?.data?.message || 'Ошибка обновления просмотров');
       setTimeout(() => setErrorMessage(''), 5000);
     },
   });
@@ -159,6 +191,10 @@ export const ArticleStatsManager: React.FC<ArticleStatsManagerProps> = ({
 
   const handleLikesUpdate = () => {
     updateLikesMutation.mutate(likesCount);
+  };
+
+  const handleViewsUpdate = () => {
+    updateViewsMutation.mutate(viewsCount);
   };
 
   const handleAddComment = () => {
@@ -228,6 +264,44 @@ export const ArticleStatsManager: React.FC<ArticleStatsManagerProps> = ({
                 startIcon={<SaveIcon />}
                 onClick={handleLikesUpdate}
                 disabled={updateLikesMutation.isPending}
+              >
+                Сохранить
+              </Button>
+            </CardActions>
+          </Card>
+        </Grid>
+
+        {/* Управление просмотрами */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Box display="flex" alignItems="center" mb={2}>
+                <VisibilityIcon color="primary" sx={{ mr: 1 }} />
+                <Typography variant="h6">Просмотры</Typography>
+              </Box>
+
+              <TextField
+                fullWidth
+                label="Количество просмотров"
+                type="number"
+                value={viewsCount}
+                onChange={(e) => setViewsCount(Math.max(0, parseInt(e.target.value) || 0))}
+                inputProps={{ min: 0 }}
+                sx={{ mb: 2 }}
+              />
+
+              <Box>
+                <Typography variant="body2" color="textSecondary">
+                  Текущее количество просмотров: <strong>{viewsCount}</strong>
+                </Typography>
+              </Box>
+            </CardContent>
+            <CardActions>
+              <Button
+                variant="contained"
+                startIcon={<SaveIcon />}
+                onClick={handleViewsUpdate}
+                disabled={updateViewsMutation.isPending}
               >
                 Сохранить
               </Button>
