@@ -41,7 +41,7 @@ const articleSchema = yup.object().shape({
   excerpt: yup.string().default('').max(300, 'Максимум 300 символов'),
   content: yup.string().required('Содержание обязательно').min(100, 'Минимум 100 символов'),
   category: yup.string().required('Категория обязательна'),
-  domain: yup.string().required('Домен обязателен'),
+  domain: yup.array().of(yup.string().required()).min(1, 'Необходимо выбрать хотя бы один домен').required('Домен обязателен'),
   status: yup.string().oneOf(['draft', 'published', 'scheduled', 'archived']).required(),
   featuredImage: yup.string().default(''),
   tags: yup.array().of(yup.string().required()).default([]),
@@ -61,7 +61,7 @@ interface ArticleFormData {
   excerpt: string;
   content: string;
   category: string;
-  domain: string;
+  domain: string[];
   tags: string[];
   status: 'draft' | 'published' | 'scheduled' | 'archived';
   featuredImage: string;
@@ -127,7 +127,7 @@ export const ArticleEditor: React.FC = () => {
       excerpt: '',
       content: '',
       category: 'Other',
-      domain: '',
+      domain: [],
       tags: [],
       status: 'published',
       featuredImage: '',
@@ -146,18 +146,30 @@ export const ArticleEditor: React.FC = () => {
       const articleData = article;
       console.log('🔍 Actual article data:', articleData);
       
-      const domainId = typeof articleData.domain === 'string' 
-        ? articleData.domain 
-        : (articleData.domain?._id || '');
+      // Обработка массива доменов
+      let domainIds: string[] = [];
+      if (Array.isArray(articleData.domain)) {
+        domainIds = articleData.domain.map(d => 
+          typeof d === 'string' ? d : (d?._id || '')
+        ).filter(Boolean);
+      } else if (articleData.domain) {
+        // Поддержка старых статей с одиночным доменом
+        const singleDomainId = typeof articleData.domain === 'string' 
+          ? articleData.domain 
+          : (articleData.domain?._id || '');
+        if (singleDomainId) {
+          domainIds = [singleDomainId];
+        }
+      }
       
-      console.log('🔍 Setting domain ID:', domainId);
+      console.log('🔍 Setting domain IDs:', domainIds);
       
       const formData = {
         title: articleData.title || '',
         excerpt: articleData.excerpt || '',
         content: articleData.content || '',
         category: articleData.category || 'Other',
-        domain: domainId,
+        domain: domainIds,
         tags: articleData.tags || [],
         status: articleData.status || 'draft',
         featuredImage: articleData.media?.featuredImage?.url || '',
@@ -734,11 +746,30 @@ export const ArticleEditor: React.FC = () => {
                   control={control}
                   render={({ field }) => (
               <FormControl fullWidth>
-                <InputLabel sx={{ color: '#cbd5e1' }}>Домен *</InputLabel>
+                <InputLabel sx={{ color: '#cbd5e1' }}>Домены *</InputLabel>
                 <Select 
                   {...field} 
-                  label="Домен *" 
+                  multiple
+                  label="Домены *" 
                   error={!!errors.domain}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {(selected as string[]).map((value) => {
+                        const domain = domains?.find((d: any) => d._id === value);
+                        return (
+                          <Chip 
+                            key={value} 
+                            label={domain?.name || value} 
+                            size="small"
+                            sx={{ 
+                              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                              color: '#f8fafc'
+                            }}
+                          />
+                        );
+                      })}
+                    </Box>
+                  )}
                   sx={{
                     backgroundColor: 'rgba(59, 130, 246, 0.05)',
                     '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(59, 130, 246, 0.2)' },

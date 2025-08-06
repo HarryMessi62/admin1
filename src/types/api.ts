@@ -62,7 +62,7 @@ export interface Article {
   hashtags: string[];
   status: 'draft' | 'published' | 'scheduled' | 'archived';
   author?: User | null;
-  domain: Domain | string;
+  domain: (Domain | string)[];
   formatting?: {
     textAlign?: string;
     fontSize?: string;
